@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <h4 class="mb-3">Add Application</h4>
+    <form method="post" action="{{ url_for('add_job') }}" class="card card-body mb-4">
+      <div class="mb-3">
+        <label class="form-label">Company</label>
+        <input type="text" name="company" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Role</label>
+        <input type="text" name="role" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Job Link</label>
+        <input type="url" name="job_link" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          {% for s in statuses %}
+            <option value="{{ s }}">{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Applied Date</label>
+        <input type="date" name="applied_date" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Add</button>
+    </form>
+  </div>
+
+  <div class="col-md-8">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">Your Applications</h4>
+      <form method="get" action="{{ url_for('jobs') }}" class="d-flex gap-2">
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All Statuses</option>
+          {% for s in statuses %}
+            <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+      </form>
+    </div>
+
+    {% if apps %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Applied</th>
+            <th>Notes</th>
+            <th>Link</th>
+            <th style="width: 130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in apps %}
+          <tr>
+            <td>{{ a.company }}</td>
+            <td>{{ a.role }}</td>
+            <td>
+              <form method="post" action="{{ url_for('update_job', id=a.id) }}" class="d-flex">
+                <select name="status" class="form-select form-select-sm me-1">
+                  {% for s in statuses %}
+                    <option value="{{ s }}" {% if a.status == s %}selected{% endif %}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+            </td>
+            <td>
+              <input
+                type="date"
+                name="applied_date"
+                class="form-control form-control-sm"
+                value="{{ a.applied_date.isoformat() if a.applied_date }}"
+              >
+            </td>
+            <td>
+              <input
+                type="text"
+                name="notes"
+                class="form-control form-control-sm"
+                value="{{ a.notes or '' }}"
+              >
+            </td>
+            <td>
+              {% if a.job_link %}
+              <a href="{{ a.job_link }}" target="_blank" class="btn btn-sm btn-outline-primary">Open</a>
+              {% else %}
+              -
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex flex-column gap-1">
+                <button type="submit" class="btn btn-sm btn-success">Save</button>
+              </form>
+              <form method="post" action="{{ url_for('delete_job', id=a.id) }}">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p>No applications yet. Add your first one on the left.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
