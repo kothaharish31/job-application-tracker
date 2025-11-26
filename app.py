@@ -1,30 +1,26 @@
 import os
-from datetime import datetime
-from flask import Flask, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-
-db_url = os.environ.get("DATABASE_URL")
-if not db_url:
-    db_url = "sqlite:///job_tracker.db"
-import os
-from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "hk-secret"
 
 db_url = os.environ.get("DATABASE_URL")
+
+if db_url and db_url.startswith("mysql://"):
+    db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
+
 if not db_url:
     db_url = "sqlite:///job_tracker.db"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "change-this-secret"
 
 db = SQLAlchemy(app)
+
 
 class User(db.Model):
     __tablename__ = "users"
